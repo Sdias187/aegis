@@ -1,0 +1,29 @@
+# =============================================================================
+# AEGIS - Docker Compose (Desenvolvimento com Hot Reload)
+# =============================================================================
+# Uso:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+# =============================================================================
+
+services:
+  aegis-app:
+    container_name: aegis-frontend-dev
+    image: node:20-alpine
+    working_dir: /app
+    ports:
+      - "${PORT:-5173}:5173"
+    environment:
+      - VITE_API_URL=${API_URL:-http://localhost:3000}
+      - VITE_ENV=development
+    volumes:
+      - .:/app
+      - /app/node_modules  # Volume anônimo para não sobrescrever node_modules
+    command: sh -c "corepack enable && pnpm install && pnpm run dev --host"
+    restart: unless-stopped
+    networks:
+      - aegis-network
+
+networks:
+  aegis-network:
+    name: aegis-network
+    driver: bridge

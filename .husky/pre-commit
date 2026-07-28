@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+# AEGIS - Pre-commit hook: lint-staged
+pnpm exec lint-staged

@@ -1,0 +1,328 @@
+# =============================================================================
+# AEGIS - Azure Pipelines CI/CD
+# =============================================================================
+# Trigger:
+#   - main:        Deploy automático
+#   - feature/*:   Quality gates apenas
+#   - pull requests: Quality gates + validação
+# =============================================================================
+
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+  paths:
+    exclude:
+      - '*.md'
+      - '.dockerignore'
+      - '.gitignore'
+
+pr:
+  branches:
+    include:
+      - main
+      - develop
+
+variables:
+  - group: aegis-variables  # Variáveis compartilhadas no Azure DevOps
+  - name: dockerRegistryServiceConnection
+    value: 'acr-aegis-connection'
+  - name: imageRepository
+    value: 'aegis-frontend'
+  - name: containerRegistry
+    value: 'acraegis.azurecr.io'
+  - name: dockerfilePath
+    value: 'Dockerfile'
+  - name: tag
+    value: '$(Build.BuildId)'
+  - name: deployUrl
+    value: 'aegis-frontend.azurecontainerapps.io'  # ✅ Ajustar para o DNS real
+  - name: vmImage
+    value: 'ubuntu-latest'
+
+stages:
+  # ===========================================================================
+  # Stage 1: Code Quality
+  # ===========================================================================
+  - stage: Quality
+    displayName: '🔍 Code Quality'
+    dependsOn: []
+    pool:
+      vmImage: $(vmImage)
+    jobs:
+      - job: lint
+        displayName: 'Lint & Format'
+        steps:
+          - checkout: self
+            fetchDepth: 1
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '20.x'
+            displayName: 'Install Node.js 20'
+
+          - script: |
+              corepack enable
+              pnpm install --frozen-lockfile
+            displayName: 'Install dependencies'
+
+          - script: pnpm run lint
+            displayName: 'Run ESLint'
+
+          - script: pnpm run format:check
+            displayName: 'Check Prettier format'
+            continueOnError: true
+
+      - job: typecheck
+        displayName: 'TypeScript Check'
+        steps:
+          - checkout: self
+            fetchDepth: 1
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '20.x'
+            displayName: 'Install Node.js 20'
+
+          - script: |
+              corepack enable
+              pnpm install --frozen-lockfile
+            displayName: 'Install dependencies'
+
+          - script: pnpm run typecheck
+            displayName: 'TypeScript type check'
+
+      - job: unit_tests
+        displayName: 'Unit Tests'
+        steps:
+          - checkout: self
+            fetchDepth: 1
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '20.x'
+            displayName: 'Install Node.js 20'
+
+          - script: |
+              corepack enable
+              pnpm install --frozen-lockfile
+            displayName: 'Install dependencies'
+
+          - script: pnpm run test -- --coverage
+            displayName: 'Run unit tests with coverage'
+
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '**/junit.xml'
+              testRunTitle: 'Unit Tests'
+            condition: succeededOrFailed()
+
+          - task: PublishCodeCoverageResults@2
+            inputs:
+              summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage/cobertura-coverage.xml'
+              pathToSources: '$(System.DefaultWorkingDirectory)/src'
+            condition: succeededOrFailed()
+
+      - job: build_check
+        displayName: 'Build Check'
+        steps:
+          - checkout: self
+            fetchDepth: 1
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '20.x'
+            displayName: 'Install Node.js 20'
+
+          - script: |
+              corepack enable
+              pnpm install --frozen-lockfile
+            displayName: 'Install dependencies'
+
+          - script: pnpm run build
+            displayName: 'Build production bundle'
+
+          - task: PublishBuildArtifacts@1
+            inputs:
+              PathtoPublish: 'dist'
+              ArtifactName: 'build-output'
+            displayName: 'Publish build artifacts'
+            condition: succeeded()
+
+  # ===========================================================================
+  # Stage 2: Tests (only on main/PR)
+  # ===========================================================================
+  - stage: Test
+    displayName: '🧪 Tests'
+    dependsOn: [Quality]
+    condition: |
+      and(
+        succeeded(),
+        or(
+          eq(variables['Build.SourceBranch'], 'refs/heads/main'),
+          eq(variables['Build.SourceBranch'], 'refs/heads/develop'),
+          eq(variables['Build.Reason'], 'PullRequest')
+        )
+      )
+    pool:
+      vmImage: $(vmImage)
+    jobs:
+      - job: integration_tests
+        displayName: 'Integration Tests'
+        steps:
+          - checkout: self
+            fetchDepth: 1
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '20.x'
+            displayName: 'Install Node.js 20'
+
+          - script: |
+              corepack enable
+              pnpm install --frozen-lockfile
+            displayName: 'Install dependencies'
+
+          - script: pnpm run test:integration
+            displayName: 'Run integration tests'
+
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '**/junit.xml'
+              testRunTitle: 'Integration Tests'
+            condition: succeededOrFailed()
+
+      - job: e2e_tests
+        displayName: 'E2E Tests'
+        steps:
+          - checkout: self
+            fetchDepth: 1
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '20.x'
+            displayName: 'Install Node.js 20'
+
+          - script: |
+              corepack enable
+              pnpm install --frozen-lockfile
+            displayName: 'Install dependencies'
+
+          - script: pnpm run build
+            displayName: 'Build for E2E'
+
+          - script: pnpm exec playwright install --with-deps chromium
+            displayName: 'Install Playwright browsers'
+
+          - script: pnpm run test:e2e
+            displayName: 'Run E2E tests'
+            env:
+              BASE_URL: 'http://localhost:4173'
+
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '**/playwright-report/results.xml'
+              testRunTitle: 'E2E Tests'
+            condition: succeededOrFailed()
+
+          - task: PublishBuildArtifacts@1
+            inputs:
+              PathtoPublish: 'playwright-report'
+              ArtifactName: 'playwright-report'
+            displayName: 'Publish Playwright report'
+            condition: succeededOrFailed()
+
+  # ===========================================================================
+  # Stage 3: Build & Push Docker Image
+  # ===========================================================================
+  - stage: BuildDocker
+    displayName: '🐳 Build & Push Docker'
+    dependsOn: [Test]
+    condition: |
+      and(
+        succeeded(),
+        eq(variables['Build.SourceBranch'], 'refs/heads/main')
+      )
+    pool:
+      vmImage: $(vmImage)
+    jobs:
+      - job: docker_build
+        displayName: 'Build and Push Docker Image'
+        steps:
+          - task: Docker@2
+            displayName: 'Login to Container Registry'
+            inputs:
+              command: login
+              containerRegistry: $(dockerRegistryServiceConnection)
+
+          - task: Docker@2
+            displayName: 'Build and Push Docker Image'
+            inputs:
+              command: buildAndPush
+              repository: $(imageRepository)
+              dockerfile: $(dockerfilePath)
+              containerRegistry: $(dockerRegistryServiceConnection)
+              tags: |
+                $(tag)
+                latest
+
+          - task: Docker@2
+            displayName: 'Logout from Container Registry'
+            inputs:
+              command: logout
+              containerRegistry: $(dockerRegistryServiceConnection)
+
+  # ===========================================================================
+  # Stage 4: Deploy
+  # ===========================================================================
+  - stage: Deploy
+    displayName: '🚀 Deploy'
+    dependsOn: [BuildDocker]
+    condition: succeeded()
+    pool:
+      vmImage: $(vmImage)
+    jobs:
+      - deployment: deploy_application
+        displayName: 'Deploy Application'
+        environment: 'production'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                # Opção 1: Azure Container Apps
+                - task: AzureContainerApps@1
+                  displayName: 'Deploy to Azure Container Apps'
+                  inputs:
+                    azureSubscription: '$(azureSubscription)'
+                    imageToDeploy: '$(containerRegistry)/$(imageRepository):$(tag)'
+                    containerAppName: 'aegis-frontend'
+                    resourceGroup: 'rg-aegis'
+                    containerAppEnvironment: 'managedEnvironment-aegis'
+                    targetPort: '80'
+                    ingress: 'external'
+                  condition: succeeded()
+
+                # Opção 2: AKS (Kubernetes) - descomentar se for usar AKS
+                # - task: Kubernetes@1
+                #   displayName: 'Deploy to AKS'
+                #   inputs:
+                #     connectionType: 'Kubernetes Service Connection'
+                #     kubernetesServiceEndpoint: 'aks-aegis'
+                #     namespace: 'aegis'
+                #     command: 'apply'
+                #     useConfigurationFile: true
+                #     configuration: 'k8s/'
+                #     secretType: 'dockerRegistry'
+                #     containerRegistryType: 'Azure Container Registry'
+
+                # Healthcheck após deploy
+                - script: |
+                    echo "Waiting for deployment to stabilize..."
+                    sleep 30
+                    curl -f http://$(deployUrl)/health || exit 1
+                    echo "Deployment healthcheck passed!"
+                  displayName: 'Post-deploy healthcheck'

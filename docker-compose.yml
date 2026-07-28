@@ -1,0 +1,86 @@
+# =============================================================================
+# AEGIS - Docker Compose (Produção)
+# =============================================================================
+# Uso:
+#   docker compose up -d          # Iniciar em background
+#   docker compose logs -f        # Ver logs
+#   docker compose down           # Parar e remover containers
+# =============================================================================
+
+services:
+  # ===========================================================================
+  # AEGIS Backend (API + Oracle)
+  # ===========================================================================
+  aegis-api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: aegis-backend
+    expose:
+      - "3000"
+    environment:
+      - ORACLE_USER=${ORACLE_USER:-AEGIS}
+      - ORACLE_PASSWORD=${ORACLE_PASSWORD:-aegis123}
+      - ORACLE_CONNECTION_STRING=${ORACLE_CONNECTION_STRING:-oracle-db:1521/XEPDB1}
+      - PORT=3000
+      - LOG_LEVEL=info
+      - DB_POOL_MIN=2
+      - DB_POOL_MAX=10
+    restart: unless-stopped
+    depends_on:
+      oracle-db:
+        condition: service_healthy
+    networks:
+      - aegis-network
+
+  # ===========================================================================
+  # AEGIS Frontend (Nginx + Static Files)
+  # ===========================================================================
+  aegis-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aegis-frontend
+    ports:
+      - "${PORT:-80}:80"
+    environment:
+      - API_URL=http://aegis-api:3000
+    restart: unless-stopped
+    depends_on:
+      - aegis-api
+    networks:
+      - aegis-network
+
+  # ===========================================================================
+  # Oracle Database
+  # ===========================================================================
+  oracle-db:
+    image: gvenzl/oracle-xe:21-slim
+    container_name: aegis-oracle
+    ports:
+      - "${ORACLE_PORT:-1521}:1521"
+    environment:
+      - ORACLE_PASSWORD=${ORACLE_PASSWORD:-aegis123}
+      - APP_USER=AEGIS
+      - APP_USER_PASSWORD=${ORACLE_PASSWORD:-aegis123}
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+      - ./backend/init-scripts:/container-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
+    restart: unless-stopped
+    networks:
+      - aegis-network
+
+volumes:
+  oracle-data:
+    name: aegis-oracle-data
+
+networks:
+  aegis-network:
+    name: aegis-network
+    driver: bridge

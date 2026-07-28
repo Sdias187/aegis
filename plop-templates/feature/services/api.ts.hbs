@@ -1,0 +1,11 @@
+import { httpClient } from '@/services';
+import { API_ENDPOINTS } from '@/api';
+// import type { {{pascalCase name}}Data } from '../types';
+
+export const {{camelCase name}}Api = {
+  list: (params?: Record<string, unknown>) =>
+    httpClient.get(API_ENDPOINTS.{{constantCase name}}.LIST, { params }).then((r) => r.data),
+
+  getById: (id: string) =>
+    httpClient.get(API_ENDPOINTS.{{constantCase name}}.DETAILS(id)).then((r) => r.data),
+};

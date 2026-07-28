@@ -1,0 +1,17 @@
+import { PageHeader } from '@/components/shared';
+
+export default function {{pascalCase name}}Page() {
+  return (
+    <div>
+      <PageHeader
+        title="{{titleCase name}}"
+        description="Descrição do módulo {{name}}"
+      />
+      <div className="rounded-lg border border-border bg-surface p-6">
+        <p className="text-center text-muted-foreground py-8">
+          Conteúdo do módulo {{name}}
+        </p>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,69 @@
+# =============================================================================
+# AEGIS - .dockerignore
+# =============================================================================
+
+# Version control
+.git
+.gitignore
+
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build output
+dist
+build
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.production.local
+.env.*.local
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test
+coverage
+.nyc_output
+test-results
+playwright-report
+
+# Logs
+*.log
+npm-debug.log*
+
+# Cache
+.cache
+.turbo
+.tsbuildinfo
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# CI/CD
+.azuredevops
+
+# Documentation
+*.md
+!README.md
+
+# Storybook
+storybook-static
+
+# Sentry
+.sentryclirc
+
+# Temp
+tmp
+temp

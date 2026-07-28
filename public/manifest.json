@@ -1,0 +1,17 @@
+{
+  "name": "AEGIS",
+  "short_name": "AEGIS",
+  "description": "Gerenciamento de Trava de Incidentes",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0D1117",
+  "theme_color": "#0D1117",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
