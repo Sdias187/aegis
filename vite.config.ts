@@ -35,13 +35,20 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id: string) {
-          if (id.includes('node_modules/react-dom') || id.includes('node_modules/react/') || id.includes('node_modules/react-router')) {
+          if (
+            id.includes('node_modules/react-dom') ||
+            id.includes('node_modules/react/') ||
+            id.includes('node_modules/react-router')
+          ) {
             return 'vendor';
           }
           if (id.includes('node_modules/@tanstack/react-query')) {
             return 'query';
           }
-          if (id.includes('node_modules/@tanstack/react-table') || id.includes('node_modules/@tanstack/react-virtual')) {
+          if (
+            id.includes('node_modules/@tanstack/react-table') ||
+            id.includes('node_modules/@tanstack/react-virtual')
+          ) {
             return 'table';
           }
           if (id.includes('node_modules/react-hook-form') || id.includes('node_modules/zod')) {
@@ -64,7 +71,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'http://localhost:8090',
         changeOrigin: true,
       },
     },
