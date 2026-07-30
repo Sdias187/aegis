@@ -67,8 +67,9 @@ export default function ImportMassivoPage() {
       setSessionId(result.sessionId);
       setPreviewData(result);
       setPageState('preview');
-    } catch (err: any) {
-      setError(err?.response?.data?.message || err?.message || 'Erro ao processar arquivo');
+    } catch (err) {
+      const axiosErr = err as { response?: { data?: { message?: string } } };
+      setError(axiosErr?.response?.data?.message || (err instanceof Error ? err.message : 'Erro ao processar arquivo'));
       setPageState('failed');
     }
   }, []);
@@ -79,8 +80,9 @@ export default function ImportMassivoPage() {
 
     try {
       await importMassivoApi.execute(sessionId);
-    } catch (err: any) {
-      setError(err?.response?.data?.message || err?.message || 'Erro ao iniciar importação');
+    } catch (err) {
+      const axiosErr = err as { response?: { data?: { message?: string } } };
+      setError(axiosErr?.response?.data?.message || (err instanceof Error ? err.message : 'Erro ao iniciar importação'));
       setPageState('failed');
     }
   };

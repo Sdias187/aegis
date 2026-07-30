@@ -78,7 +78,8 @@ function useInitialExpandedGroups(groups: NavGroup[]): Set<string> {
 
 export function Sidebar() {
   const { isCollapsed, isOpen, collapse, expand } = useSidebarStore();
-  const [expandedGroups, setExpandedGroups] = useState(() => useInitialExpandedGroups(navGroups));
+  const initialExpanded = useInitialExpandedGroups(navGroups);
+  const [expandedGroups, setExpandedGroups] = useState(initialExpanded);
 
   const toggleGroup = (label: string) => {
     setExpandedGroups((prev) => {
