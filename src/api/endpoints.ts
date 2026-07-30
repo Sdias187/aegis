@@ -24,6 +24,12 @@ export const API_ENDPOINTS = {
     REPORT: (id: string) => `/import/${id}/report`,
     HISTORY: '/import/history',
   },
+  IMPORT_MASSIVO: {
+    PREVIEW: '/import-massivo/preview',
+    EXECUTE: (sessionId: string) => `/import-massivo/execute/${sessionId}`,
+    STATUS: (sessionId: string) => `/import-massivo/status/${sessionId}`,
+    MODELO: '/import-massivo/modelo',
+  },
   LOGS: {
     EXECUTION: '/logs/execucao',
     EXECUTION_DETAILS: (id: string) => `/logs/execucao/${id}`,

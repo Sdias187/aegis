@@ -10,8 +10,8 @@ set -e
 
 # Verificar se a variável API_URL está definida
 if [ -z "${API_URL}" ]; then
-    echo "[AEGIS] WARNING: API_URL não definida. Usando http://localhost:3000 como padrão."
-    export API_URL="http://localhost:3000"
+    echo "[AEGIS] WARNING: API_URL não definida. Usando http://localhost:8090 como padrão."
+    export API_URL="http://localhost:8090"
 fi
 
 # Substituir ${API_URL} no nginx.conf

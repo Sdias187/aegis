@@ -1,0 +1,55 @@
+# =============================================================================
+# AEGIS - Docker Compose (Teste corporativo)
+# =============================================================================
+# Uso:
+#   ORACLE_USER=usuario \
+#   ORACLE_PASSWORD=senha \
+#   ORACLE_CONNECTION_STRING=host:1521/SERVICE_NAME \
+#   docker compose -f docker-compose.test.yml up -d
+# =============================================================================
+
+services:
+  # ===========================================================================
+  # AEGIS Backend (API)
+  # ===========================================================================
+  aegis-api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: aegis-backend
+    ports:
+      - "8090:8090"
+    environment:
+      - ORACLE_USER=${ORACLE_USER}
+      - ORACLE_PASSWORD=${ORACLE_PASSWORD}
+      - ORACLE_CONNECTION_STRING=${ORACLE_CONNECTION_STRING}
+      - PORT=8090
+      - LOG_LEVEL=info
+      - DB_POOL_MIN=2
+      - DB_POOL_MAX=10
+    restart: unless-stopped
+    networks:
+      - aegis-network
+
+  # ===========================================================================
+  # AEGIS Frontend (Nginx + Static Files)
+  # ===========================================================================
+  aegis-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aegis-frontend
+    ports:
+      - "${PORT:-80}:80"
+    environment:
+      - API_URL=http://aegis-api:8090
+    restart: unless-stopped
+    depends_on:
+      - aegis-api
+    networks:
+      - aegis-network
+
+networks:
+  aegis-network:
+    name: aegis-network
+    driver: bridge

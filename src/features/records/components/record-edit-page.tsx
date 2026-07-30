@@ -33,7 +33,7 @@ export default function RecordEditPage() {
       <Card className="max-w-2xl p-6">
         <RecordForm
           defaultValues={{
-            atendimentoPara: record.atendimentoPara,
+            atendimentoPara: record.atendimentoPara as 'b2c' | 'b2b' | 'interno',
             servico: record.servico,
             ofertaServico: record.ofertaServico,
             detalheFalha: record.detalheFalha,

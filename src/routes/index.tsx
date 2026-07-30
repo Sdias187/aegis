@@ -10,6 +10,10 @@ import {
   LazyImport,
   LazyExecutionLogs,
   LazyMonitoring,
+  LazyGps,
+  LazyVivo360,
+  LazySiebel,
+  LazyImportMassivo,
 } from './lazy-routes';
 
 const routes: RouteObject[] = [
@@ -24,6 +28,10 @@ const routes: RouteObject[] = [
       { path: ROUTES.IMPORT, element: <LazyImport /> },
       { path: ROUTES.LOGS.EXECUTION, element: <LazyExecutionLogs /> },
       { path: ROUTES.MONITORING, element: <LazyMonitoring /> },
+      { path: ROUTES.CONSULTA_LOGS.GPS, element: <LazyGps /> },
+      { path: ROUTES.CONSULTA_LOGS.VIVO_360, element: <LazyVivo360 /> },
+      { path: ROUTES.SERVICOS.SIEBEL, element: <LazySiebel /> },
+      { path: ROUTES.IMPORT_MASSIVO, element: <LazyImportMassivo /> },
     ],
   },
 ];

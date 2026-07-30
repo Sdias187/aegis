@@ -11,6 +11,11 @@ const breadcrumbLabels: Record<string, string> = {
   logs: 'Logs',
   execution: 'Execução',
   monitoring: 'Monitoramento',
+  'consulta-logs': 'Consulta de Logs',
+  gps: 'GPS',
+  'vivo-360': 'VIVO 360',
+  servicos: 'Serviços',
+  siebel: 'Siebel',
 };
 
 export function Breadcrumb() {

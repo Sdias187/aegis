@@ -8,12 +8,12 @@
 services:
   aegis-app:
     container_name: aegis-frontend-dev
-    image: node:20-alpine
+    image: node:22-alpine
     working_dir: /app
     ports:
       - "${PORT:-5173}:5173"
     environment:
-      - VITE_API_URL=${API_URL:-http://localhost:3000}
+      - VITE_API_URL=${API_URL:-http://localhost:8090}
       - VITE_ENV=development
     volumes:
       - .:/app

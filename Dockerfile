@@ -3,7 +3,7 @@
 # =============================================================================
 # Stage 1: Build
 # =============================================================================
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 LABEL stage=aegis-builder
 
@@ -14,7 +14,7 @@ RUN addgroup --system --gid 1001 nodejs && \
 WORKDIR /app
 
 # Cache de dependências: copiar apenas arquivos de configuração primeiro
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml pnpm-approved-builds.json ./
 COPY .npmrc* ./
 
 # Instalar dependências (com frozen lockfile para consistência)
@@ -23,6 +23,10 @@ RUN corepack enable && \
 
 # Copiar código fonte
 COPY . .
+
+# Ajustar permissões e rodar build como usuário não-root
+RUN chown -R aegis:nodejs /app
+USER aegis
 
 # Build de produção
 RUN pnpm run build
@@ -36,11 +40,7 @@ LABEL maintainer="AEGIS Team" \
       description="AEGIS Frontend Application" \
       version="1.0.0"
 
-# Segurança: não rodar como root
-RUN addgroup --system --gid 1001 nginx && \
-    adduser --system --uid 1001 nginx
-
-# Remover configuração padrão do Nginx
+# O usuário nginx já existe na imagem base (remover padrão)
 RUN rm -rf /etc/nginx/conf.d/default.conf && \
     rm -rf /usr/share/nginx/html/*
 

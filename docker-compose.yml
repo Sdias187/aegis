@@ -17,12 +17,12 @@ services:
       dockerfile: Dockerfile
     container_name: aegis-backend
     expose:
-      - "3000"
+      - "8090"
     environment:
       - ORACLE_USER=${ORACLE_USER:-AEGIS}
       - ORACLE_PASSWORD=${ORACLE_PASSWORD:-aegis123}
       - ORACLE_CONNECTION_STRING=${ORACLE_CONNECTION_STRING:-oracle-db:1521/XEPDB1}
-      - PORT=3000
+      - PORT=8090
       - LOG_LEVEL=info
       - DB_POOL_MIN=2
       - DB_POOL_MAX=10
@@ -44,7 +44,7 @@ services:
     ports:
       - "${PORT:-80}:80"
     environment:
-      - API_URL=http://aegis-api:3000
+      - API_URL=http://aegis-api:8090
     restart: unless-stopped
     depends_on:
       - aegis-api

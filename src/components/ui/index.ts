@@ -5,3 +5,4 @@ export { Badge } from './badge';
 export { Skeleton } from './skeleton';
 export { Tooltip } from './tooltip';
 export { Dialog } from './dialog';
+export { Select } from './select';
