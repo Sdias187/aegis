@@ -19,4 +19,9 @@ export class DashboardController {
   async health() {
     return this.dashboardService.getHealth();
   }
+
+  @Get('external-health')
+  async externalHealth() {
+    return this.dashboardService.getExternalHealth();
+  }
 }

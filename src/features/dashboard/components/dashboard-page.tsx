@@ -6,7 +6,7 @@ import { RecentActivity } from './recent-activity';
 import { SystemStatus } from './system-status';
 
 export default function DashboardPage() {
-  const { summary, recentActivity, health, isLoading, isError } = useDashboard();
+  const { summary, recentActivity, externalHealth, isLoading, isError } = useDashboard();
 
   if (isError) {
     return (
@@ -36,7 +36,7 @@ export default function DashboardPage() {
       {/* Bottom Grid */}
       <div className="grid gap-6 lg:grid-cols-2">
         <RecentActivity data={recentActivity.data} isLoading={isLoading} />
-        <SystemStatus data={health.data} isLoading={isLoading} />
+        <SystemStatus externalHealth={externalHealth.data} isLoading={isLoading} />
       </div>
     </div>
   );

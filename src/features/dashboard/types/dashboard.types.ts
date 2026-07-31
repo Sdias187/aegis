@@ -5,6 +5,7 @@ export interface DashboardSummary {
   totalImports: number;
   successfulImports: number;
   failedImports: number;
+  travasComSucessoUltimaHora: number;
 }
 
 export interface RecentActivityItem {
@@ -18,6 +19,15 @@ export interface SystemHealth {
   status: 'healthy' | 'degraded' | 'down';
   uptime: number;
   lastCheck: string;
+}
+
+export interface ExternalServiceHealth {
+  url: string;
+  status: 'healthy' | 'degraded' | 'down';
+  statusCode?: number;
+  responseTimeMs: number;
+  lastCheck: string;
+  details?: string;
 }
 
 export interface DashboardData {

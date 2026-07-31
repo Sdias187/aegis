@@ -7,7 +7,6 @@ import {
   HttpStatus,
   NotFoundException,
   Param,
-  ParseIntPipe,
   Post,
   Put,
   Query,
@@ -26,7 +25,7 @@ export class FichasController {
   }
 
   @Get(':id')
-  async getById(@Param('id', ParseIntPipe) id: number) {
+  async getById(@Param('id') id: string) {
     const result = await this.fichasService.getById(id);
     if (!result) {
       throw new NotFoundException({ type: 'NOT_FOUND', message: 'Ficha não encontrada' });
@@ -40,13 +39,13 @@ export class FichasController {
   }
 
   @Put(':id')
-  async update(@Param('id', ParseIntPipe) id: number, @Body() data: UpdateFichaDto) {
+  async update(@Param('id') id: string, @Body() data: UpdateFichaDto) {
     return this.fichasService.update(id, data);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
+  async remove(@Param('id') id: string): Promise<void> {
     await this.fichasService.remove(id);
   }
 }

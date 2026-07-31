@@ -17,10 +17,17 @@ export function useDashboard() {
     queryFn: dashboardApi.getHealth,
   });
 
+  const externalHealth = useQuery({
+    queryKey: ['dashboard', 'external-health'],
+    queryFn: dashboardApi.getExternalHealth,
+    refetchInterval: 30000,
+  });
+
   return {
     summary,
     recentActivity,
     health,
+    externalHealth,
     isLoading: summary.isLoading || recentActivity.isLoading || health.isLoading,
     isError: summary.isError || recentActivity.isError || health.isError,
   };

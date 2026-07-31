@@ -15,8 +15,6 @@ export interface Trava {
   endpoint: string;
   metodo: string;
   ativo: boolean;
-  dataCriacao: string;
-  dataDesativacao?: string;
 }
 
 export interface TravaListParams {

@@ -1,4 +1,4 @@
-import { Controller, Get, NotFoundException, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param, Post, Query } from '@nestjs/common';
 import { TravasService } from './travas.service';
 import { PaginationPipe } from '../common/pipes/pagination.pipe';
 import type { PaginationParams } from '../common/interfaces';
@@ -13,7 +13,7 @@ export class TravasController {
   }
 
   @Get(':id')
-  async getById(@Param('id', ParseIntPipe) id: number) {
+  async getById(@Param('id') id: string) {
     const result = await this.travasService.getById(id);
     if (!result) {
       throw new NotFoundException({ type: 'NOT_FOUND', message: 'Trava não encontrada' });
@@ -22,7 +22,7 @@ export class TravasController {
   }
 
   @Post(':id/disable')
-  async disable(@Param('id', ParseIntPipe) id: number) {
+  async disable(@Param('id') id: string) {
     return this.travasService.disable(id);
   }
 }

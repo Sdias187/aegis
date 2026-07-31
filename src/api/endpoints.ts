@@ -6,6 +6,7 @@ export const API_ENDPOINTS = {
     SUMMARY: '/dashboard/summary',
     RECENT_ACTIVITY: '/dashboard/recent-activity',
     HEALTH: '/dashboard/health',
+    EXTERNAL_HEALTH: '/dashboard/external-health',
   },
   FICHAS: {
     LIST: '/fichas',

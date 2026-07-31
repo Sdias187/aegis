@@ -1,6 +1,5 @@
-import { Calendar, FileText, Globe, Terminal } from 'lucide-react';
+import { FileText, Globe, Terminal } from 'lucide-react';
 import { Dialog, Badge, Skeleton } from '@/components/ui';
-import { formatDate } from '@/utils';
 import { useLock } from '../hooks/use-locks';
 
 interface LockDetailsModalProps {
@@ -22,8 +21,6 @@ export function LockDetailsModal({ lockId, onClose }: LockDetailsModalProps) {
           <Field icon={FileText} label="Descrição" value={lock.descricao ?? '---'} />
           <Field icon={Globe} label="Endpoint" value={lock.endpoint} />
           <Field icon={Terminal} label="Método" value={lock.metodo} />
-          <Field icon={Calendar} label="Criado em" value={formatDate(lock.dataCriacao)} />
-          {lock.dataDesativacao && <Field icon={Calendar} label="Desativado em" value={formatDate(lock.dataDesativacao)} />}
         </div>
       ) : (<p className="text-sm text-muted-foreground">Trava não encontrada.</p>)}
     </Dialog>

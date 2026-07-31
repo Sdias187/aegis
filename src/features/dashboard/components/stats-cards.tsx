@@ -1,4 +1,4 @@
-import { FileText, Lock, Shield, Upload, CheckCircle, XCircle } from 'lucide-react';
+import { FileText, Lock, Shield, CheckCircle } from 'lucide-react';
 import { Card } from '@/components/ui';
 import { Skeleton } from '@/components/ui';
 import { cn, formatNumber } from '@/utils';
@@ -62,7 +62,7 @@ export function StatsCards({ data, isLoading }: StatsCardsProps) {
 
   const cards: StatCardProps[] = [
     {
-      title: 'Total de Fichas',
+      title: 'Fichas',
       value: formatNumber(data.totalRecords),
       icon: <FileText className="size-5" />,
       variant: 'default',
@@ -74,28 +74,16 @@ export function StatsCards({ data, isLoading }: StatsCardsProps) {
       variant: 'warning',
     },
     {
-      title: 'Travas Desativadas',
-      value: formatNumber(data.disabledLocks),
-      icon: <Shield className="size-5" />,
-      variant: 'info',
-    },
-    {
-      title: 'Importações Realizadas',
-      value: formatNumber(data.totalImports),
-      icon: <Upload className="size-5" />,
-      variant: 'default',
-    },
-    {
-      title: 'Importações com Sucesso',
-      value: formatNumber(data.successfulImports),
+      title: 'Travas com Sucesso (1h)',
+      value: formatNumber(data.travasComSucessoUltimaHora),
       icon: <CheckCircle className="size-5" />,
       variant: 'success',
     },
     {
-      title: 'Importações com Falha',
-      value: formatNumber(data.failedImports),
-      icon: <XCircle className="size-5" />,
-      variant: 'danger',
+      title: 'Travas Desativadas',
+      value: formatNumber(data.disabledLocks),
+      icon: <Shield className="size-5" />,
+      variant: 'info',
     },
   ];
 

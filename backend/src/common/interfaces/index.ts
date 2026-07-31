@@ -15,8 +15,6 @@ export interface Trava {
   endpoint: string;
   metodo: string;
   ativo: boolean;
-  dataCriacao?: string;
-  dataDesativacao?: string;
 }
 
 export interface ExecLog {
@@ -77,6 +75,16 @@ export interface DashboardSummary {
   totalImports: number;
   successfulImports: number;
   failedImports: number;
+  travasComSucessoUltimaHora: number;
+}
+
+export interface ExternalServiceHealth {
+  url: string;
+  status: 'healthy' | 'degraded' | 'down';
+  statusCode?: number;
+  responseTimeMs: number;
+  lastCheck: string;
+  details?: string;
 }
 
 export interface SystemHealth {
