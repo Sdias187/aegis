@@ -1,7 +1,20 @@
-import { Controller, Get, Post, Body, Param, Query, NotFoundException } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  NotFoundException,
+  Param,
+  ParseIntPipe,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
 import { FichasService } from './fichas.service';
 import { PaginationPipe } from '../common/pipes/pagination.pipe';
-import type { PaginationParams, CreateFichaDto } from '../common/interfaces';
+import type { CreateFichaDto, PaginationParams, UpdateFichaDto } from '../common/interfaces';
 
 @Controller('fichas')
 export class FichasController {
@@ -13,9 +26,8 @@ export class FichasController {
   }
 
   @Get(':id')
-  async getById(@Param('id') id: string) {
-    const numericId = Number(id);
-    const result = await this.fichasService.getById(numericId);
+  async getById(@Param('id', ParseIntPipe) id: number) {
+    const result = await this.fichasService.getById(id);
     if (!result) {
       throw new NotFoundException({ type: 'NOT_FOUND', message: 'Ficha não encontrada' });
     }
@@ -25,5 +37,16 @@ export class FichasController {
   @Post()
   async create(@Body() data: CreateFichaDto) {
     return this.fichasService.create(data);
+  }
+
+  @Put(':id')
+  async update(@Param('id', ParseIntPipe) id: number, @Body() data: UpdateFichaDto) {
+    return this.fichasService.update(id, data);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    await this.fichasService.remove(id);
   }
 }

@@ -79,7 +79,7 @@ export class MonitoringService {
     const orderBy = resolveOrderBy(params.sortBy, params.sortOrder);
 
     const sql = `
-      SELECT SOURCE_SYSTEM, REQUEST_BODY, DURATION_MS, REMOTE_ADDR, USER_AGENT, CREATED_AT
+      SELECT ID, SOURCE_SYSTEM, REQUEST_BODY, DURATION_MS, REMOTE_ADDR, USER_AGENT, CREATED_AT
       FROM AEGIS_MONITORING_LOGS
       ${where}
       ${orderBy}
@@ -97,7 +97,7 @@ export class MonitoringService {
 
     return {
       data: dataResult.rows.map((row) => ({
-        id: row.ID,
+        id: String(row.ID),
         sourceSystem: row.SOURCE_SYSTEM,
         requestBody: row.REQUEST_BODY ?? undefined,
         durationMs: Number(row.DURATION_MS ?? 0),

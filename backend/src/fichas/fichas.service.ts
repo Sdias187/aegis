@@ -1,23 +1,39 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import oracledb from 'oracledb';
 import { DatabaseService } from '../database/database.service';
-import type { Ficha, PaginationParams, PaginatedResponse, CreateFichaDto } from '../common/interfaces';
+import type {
+  CreateFichaDto,
+  Ficha,
+  PaginatedResponse,
+  PaginationParams,
+  UpdateFichaDto,
+} from '../common/interfaces';
 
-const VALID_SORT_COLUMNS_FICHAS = new Set([
-  'ATENDIMENTO_PARA',
-  'SERVICO',
-  'OFERTA_SERVICO',
-  'DETALHE_FALHA',
-  'CATEGORIA',
-  'SUBCATEGORIA',
-]);
+const SORT_COLUMNS: Record<string, string> = {
+  id: 'ID',
+  atendimentoPara: 'ATENDIMENTO_PARA',
+  servico: 'SERVICO',
+  ofertaServico: 'OFERTA_SERVICO',
+  detalheFalha: 'DETALHE_FALHA',
+  categoria: 'CATEGORIA',
+  subcategoria: 'SUBCATEGORIA',
+  ID: 'ID',
+  ATENDIMENTO_PARA: 'ATENDIMENTO_PARA',
+  SERVICO: 'SERVICO',
+  OFERTA_SERVICO: 'OFERTA_SERVICO',
+  DETALHE_FALHA: 'DETALHE_FALHA',
+  CATEGORIA: 'CATEGORIA',
+  SUBCATEGORIA: 'SUBCATEGORIA',
+};
 
 function resolveOrderBy(
   sortBy?: string,
   sortOrder?: 'asc' | 'desc',
   defaultSort = 'ATENDIMENTO_PARA ASC',
 ): string {
-  if (sortBy && VALID_SORT_COLUMNS_FICHAS.has(sortBy)) {
-    return `ORDER BY ${sortBy} ${sortOrder === 'desc' ? 'DESC' : 'ASC'}`;
+  const column = sortBy ? SORT_COLUMNS[sortBy] : undefined;
+  if (column) {
+    return `ORDER BY ${column} ${sortOrder === 'desc' ? 'DESC' : 'ASC'}`;
   }
   return `ORDER BY ${defaultSort}`;
 }
@@ -69,7 +85,7 @@ export class FichasService {
     const orderBy = resolveOrderBy(params.sortBy, params.sortOrder);
 
     const sql = `
-      SELECT ATENDIMENTO_PARA, SERVICO, OFERTA_SERVICO, DETALHE_FALHA, CATEGORIA, SUBCATEGORIA
+      SELECT ID, ATENDIMENTO_PARA, SERVICO, OFERTA_SERVICO, DETALHE_FALHA, CATEGORIA, SUBCATEGORIA
       FROM AEGIS_FICHAS
       ${where}
       ${orderBy}
@@ -86,8 +102,8 @@ export class FichasService {
     const total = Number(countResult.rows[0]?.TOTAL ?? 0);
 
     return {
-      data: dataResult.rows.map((row, i) => ({
-        id: offset + i + 1,
+      data: dataResult.rows.map((row) => ({
+        id: String(row.ID),
         atendimentoPara: row.ATENDIMENTO_PARA,
         servico: row.SERVICO,
         ofertaServico: row.OFERTA_SERVICO ?? undefined,
@@ -106,54 +122,50 @@ export class FichasService {
 
   async getById(id: number): Promise<Ficha | null> {
     const sql = `
-      SELECT ATENDIMENTO_PARA, SERVICO, OFERTA_SERVICO, DETALHE_FALHA, CATEGORIA, SUBCATEGORIA
+      SELECT ID, ATENDIMENTO_PARA, SERVICO, OFERTA_SERVICO, DETALHE_FALHA, CATEGORIA, SUBCATEGORIA
       FROM AEGIS_FICHAS
-      OFFSET ${id - 1} ROWS FETCH NEXT 1 ROWS ONLY
+      WHERE ID = :id
     `;
-    const result = await this.db.executeQuery<any>(sql);
+    const result = await this.db.executeQuery<any>(sql, { id });
     if (!result.rows[0]) return null;
-    const r = result.rows[0];
+    const row = result.rows[0];
     return {
-      id,
-      atendimentoPara: r.ATENDIMENTO_PARA,
-      servico: r.SERVICO,
-      ofertaServico: r.OFERTA_SERVICO ?? undefined,
-      detalheFalha: r.DETALHE_FALHA ?? undefined,
-      categoria: r.CATEGORIA ?? undefined,
-      subcategoria: r.SUBCATEGORIA ?? undefined,
+      id: String(row.ID),
+      atendimentoPara: row.ATENDIMENTO_PARA,
+      servico: row.SERVICO,
+      ofertaServico: row.OFERTA_SERVICO ?? undefined,
+      detalheFalha: row.DETALHE_FALHA ?? undefined,
+      categoria: row.CATEGORIA ?? undefined,
+      subcategoria: row.SUBCATEGORIA ?? undefined,
     };
   }
 
   async create(data: CreateFichaDto): Promise<Ficha> {
-    // Buscar próximo ID disponível
-    const idResult = await this.db.executeQuery<{ NEXT_ID: number }>(
-      'SELECT COALESCE(MAX(ID), 0) + 1 AS NEXT_ID FROM AEGIS_FICHAS',
-    );
-    const newId = Number(idResult.rows[0]?.NEXT_ID ?? 1);
-
-    // Default N/A para campos opcionais não preenchidos
     const categoria = data.categoria?.trim() || 'N/A';
     const subcategoria = data.subcategoria?.trim() || 'N/A';
 
-    const sql = `
-      INSERT INTO AEGIS_FICHAS (ID, ATENDIMENTO_PARA, SERVICO, OFERTA_SERVICO, DETALHE_FALHA, CATEGORIA, SUBCATEGORIA)
-      VALUES (:id, :atendimentoPara, :servico, :ofertaServico, :detalheFalha, :categoria, :subcategoria)
-    `;
-
-    await this.db.executeQuery(sql, {
-      id: newId,
-      atendimentoPara: data.atendimentoPara,
-      servico: data.servico,
-      ofertaServico: data.ofertaServico ?? null,
-      detalheFalha: data.detalheFalha ?? null,
-      categoria,
-      subcategoria,
-    });
+    const result = await this.db.executeQuery(
+      `INSERT INTO AEGIS_FICHAS (
+         ATENDIMENTO_PARA, SERVICO, OFERTA_SERVICO, DETALHE_FALHA, CATEGORIA, SUBCATEGORIA
+       ) VALUES (
+         :atendimentoPara, :servico, :ofertaServico, :detalheFalha, :categoria, :subcategoria
+       ) RETURNING ID INTO :id`,
+      {
+        atendimentoPara: data.atendimentoPara,
+        servico: data.servico,
+        ofertaServico: data.ofertaServico ?? null,
+        detalheFalha: data.detalheFalha ?? null,
+        categoria,
+        subcategoria,
+        id: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
+      },
+    );
+    const newId = this.getReturnedId(result.outBinds?.id);
 
     this.logger.log(`Ficha created — ID: ${newId}`);
 
     return {
-      id: newId,
+      id: String(newId),
       atendimentoPara: data.atendimentoPara,
       servico: data.servico,
       ofertaServico: data.ofertaServico ?? undefined,
@@ -161,5 +173,59 @@ export class FichasService {
       categoria,
       subcategoria,
     };
+  }
+
+  async update(id: number, data: UpdateFichaDto): Promise<Ficha> {
+    const existing = await this.getById(id);
+    if (!existing) {
+      throw new NotFoundException({ type: 'NOT_FOUND', message: 'Ficha não encontrada' });
+    }
+
+    const fields = {
+      atendimentoPara: data.atendimentoPara ?? existing.atendimentoPara,
+      servico: data.servico ?? existing.servico,
+      ofertaServico: data.ofertaServico ?? existing.ofertaServico ?? null,
+      detalheFalha: data.detalheFalha ?? existing.detalheFalha ?? null,
+      categoria: data.categoria?.trim() || existing.categoria || 'N/A',
+      subcategoria: data.subcategoria?.trim() || existing.subcategoria || 'N/A',
+    };
+
+    await this.db.executeQuery(
+      `UPDATE AEGIS_FICHAS
+       SET ATENDIMENTO_PARA = :atendimentoPara,
+           SERVICO = :servico,
+           OFERTA_SERVICO = :ofertaServico,
+           DETALHE_FALHA = :detalheFalha,
+           CATEGORIA = :categoria,
+           SUBCATEGORIA = :subcategoria,
+           DATA_ATUALIZACAO = SYSTIMESTAMP
+       WHERE ID = :id`,
+      { id, ...fields },
+    );
+
+    return {
+      id: String(id),
+      atendimentoPara: fields.atendimentoPara,
+      servico: fields.servico,
+      ofertaServico: fields.ofertaServico ?? undefined,
+      detalheFalha: fields.detalheFalha ?? undefined,
+      categoria: fields.categoria,
+      subcategoria: fields.subcategoria,
+    };
+  }
+
+  async remove(id: number): Promise<void> {
+    const result = await this.db.executeQuery('DELETE FROM AEGIS_FICHAS WHERE ID = :id', { id });
+    if (!result.rowsAffected) {
+      throw new NotFoundException({ type: 'NOT_FOUND', message: 'Ficha não encontrada' });
+    }
+  }
+
+  private getReturnedId(value: unknown): number {
+    const id = Array.isArray(value) ? value[0] : value;
+    if (typeof id !== 'number') {
+      throw new InternalServerErrorException('Não foi possível obter o ID da ficha criada');
+    }
+    return id;
   }
 }

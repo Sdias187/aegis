@@ -1,5 +1,5 @@
 export interface Ficha {
-  id?: number;
+  id?: string;
   atendimentoPara: string;
   servico: string;
   ofertaServico?: string;
@@ -9,7 +9,7 @@ export interface Ficha {
 }
 
 export interface Trava {
-  id?: number;
+  id?: string;
   nome: string;
   descricao?: string;
   endpoint: string;
@@ -20,7 +20,7 @@ export interface Trava {
 }
 
 export interface ExecLog {
-  id?: number;
+  id?: string;
   endpoint: string;
   validationName: string;
   result?: string;
@@ -31,7 +31,7 @@ export interface ExecLog {
 }
 
 export interface MonitoringLog {
-  id?: number;
+  id?: string;
   sourceSystem: string;
   requestBody?: string;
   durationMs: number;
@@ -93,3 +93,5 @@ export interface CreateFichaDto {
   categoria?: string;
   subcategoria?: string;
 }
+
+export type UpdateFichaDto = Partial<CreateFichaDto>;

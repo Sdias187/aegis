@@ -1,5 +1,6 @@
 import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
+import oracledb from 'oracledb';
 import * as XLSX from 'xlsx';
 import { DatabaseService } from '../database/database.service';
 
@@ -238,27 +239,27 @@ export class ImportMassivoService {
   }
 
   private async insertRow(row: ImportRow): Promise<void> {
-    const idResult = await this.db.executeQuery<{ NEXT_ID: number }>(
-      'SELECT COALESCE(MAX(ID), 0) + 1 AS NEXT_ID FROM AEGIS_FICHAS',
-    );
-    const newId = Number(idResult.rows[0]?.NEXT_ID ?? 1);
-
     const categoria = row.categoria?.trim() || 'N/A';
     const subcategoria = row.subcategoria?.trim() || 'N/A';
 
-    await this.db.executeQuery(
-      `INSERT INTO AEGIS_FICHAS (ID, ATENDIMENTO_PARA, SERVICO, OFERTA_SERVICO, DETALHE_FALHA, CATEGORIA, SUBCATEGORIA)
-       VALUES (:id, :atendimentoPara, :servico, :ofertaServico, :detalheFalha, :categoria, :subcategoria)`,
+    const result = await this.db.executeQuery(
+      `INSERT INTO AEGIS_FICHAS (ATENDIMENTO_PARA, SERVICO, OFERTA_SERVICO, DETALHE_FALHA, CATEGORIA, SUBCATEGORIA)
+       VALUES (:atendimentoPara, :servico, :ofertaServico, :detalheFalha, :categoria, :subcategoria)
+       RETURNING ID INTO :id`,
       {
-        id: newId,
         atendimentoPara: row.atendimentoPara,
         servico: row.servico,
         ofertaServico: row.ofertaServico ?? null,
         detalheFalha: row.detalheFalha ?? null,
         categoria,
         subcategoria,
+        id: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
       },
     );
+
+    if (typeof result.outBinds?.id !== 'number') {
+      throw new Error('Não foi possível obter o ID da ficha importada');
+    }
   }
 
   private normalizeAtendimentoPara(value: string): string {

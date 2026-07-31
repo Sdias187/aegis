@@ -61,7 +61,7 @@ export class DatabaseService implements OnModuleInit, OnApplicationShutdown {
   async executeQuery<T>(
     sql: string,
     binds: Record<string, unknown> = {},
-  ): Promise<{ rows: T[]; rowsAffected?: number }> {
+  ): Promise<{ rows: T[]; rowsAffected?: number; outBinds?: Record<string, unknown> }> {
     if (this.mockMode) {
       this.logger.debug(`[MOCK] Query ignorada: ${sql.slice(0, 80)}...`);
       return { rows: [] as T[] };
@@ -73,6 +73,7 @@ export class DatabaseService implements OnModuleInit, OnApplicationShutdown {
       return {
         rows: (result.rows ?? []) as T[],
         rowsAffected: result.rowsAffected,
+        outBinds: result.outBinds as Record<string, unknown> | undefined,
       };
     } finally {
       await conn.close();

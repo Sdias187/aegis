@@ -1,22 +1,30 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
-import type { Trava, PaginationParams, PaginatedResponse } from '../common/interfaces';
+import type { PaginatedResponse, PaginationParams, Trava } from '../common/interfaces';
 
-const VALID_SORT_COLUMNS_TRAVAS = new Set([
-  'NOME',
-  'DESCRICAO',
-  'ENDPOINT',
-  'METODO',
-  'ATIVO',
-]);
+const SORT_COLUMNS: Record<string, string> = {
+  id: 'ID',
+  nome: 'NOME',
+  descricao: 'DESCRICAO',
+  endpoint: 'ENDPOINT',
+  metodo: 'METODO',
+  ativo: 'ATIVO',
+  ID: 'ID',
+  NOME: 'NOME',
+  DESCRICAO: 'DESCRICAO',
+  ENDPOINT: 'ENDPOINT',
+  METODO: 'METODO',
+  ATIVO: 'ATIVO',
+};
 
 function resolveOrderBy(
   sortBy?: string,
   sortOrder?: 'asc' | 'desc',
   defaultSort = 'NOME ASC',
 ): string {
-  if (sortBy && VALID_SORT_COLUMNS_TRAVAS.has(sortBy)) {
-    return `ORDER BY ${sortBy} ${sortOrder === 'desc' ? 'DESC' : 'ASC'}`;
+  const column = sortBy ? SORT_COLUMNS[sortBy] : undefined;
+  if (column) {
+    return `ORDER BY ${column} ${sortOrder === 'desc' ? 'DESC' : 'ASC'}`;
   }
   return `ORDER BY ${defaultSort}`;
 }
@@ -55,10 +63,10 @@ export class TravasService {
     });
 
     const where = conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : '';
-    const orderBy = resolveOrderBy(params.sortBy, params.sortOrder, 'NOME ASC');
+    const orderBy = resolveOrderBy(params.sortBy, params.sortOrder);
 
     const sql = `
-      SELECT NOME, DESCRICAO, ENDPOINT, METODO, ATIVO
+      SELECT ID, NOME, DESCRICAO, ENDPOINT, METODO, ATIVO, DATA_CRIACAO, DATA_DESATIVACAO
       FROM AEGIS_TRAVAS
       ${where}
       ${orderBy}
@@ -75,14 +83,7 @@ export class TravasService {
     const total = Number(countResult.rows[0]?.TOTAL ?? 0);
 
     return {
-      data: dataResult.rows.map((row, i) => ({
-        id: offset + i + 1,
-        nome: row.NOME,
-        descricao: row.DESCRICAO ?? undefined,
-        endpoint: row.ENDPOINT,
-        metodo: row.METODO,
-        ativo: Boolean(row.ATIVO),
-      })),
+      data: dataResult.rows.map((row) => this.mapTrava(row)),
       pagination: {
         page: params.page,
         limit: params.limit,
@@ -93,21 +94,53 @@ export class TravasService {
   }
 
   async getById(id: number): Promise<Trava | null> {
-    const sql = `
-      SELECT NOME, DESCRICAO, ENDPOINT, METODO, ATIVO
-      FROM AEGIS_TRAVAS
-      OFFSET ${id - 1} ROWS FETCH NEXT 1 ROWS ONLY
-    `;
-    const result = await this.db.executeQuery<any>(sql);
-    if (!result.rows[0]) return null;
-    const r = result.rows[0];
+    const result = await this.db.executeQuery<any>(
+      `SELECT ID, NOME, DESCRICAO, ENDPOINT, METODO, ATIVO, DATA_CRIACAO, DATA_DESATIVACAO
+       FROM AEGIS_TRAVAS
+       WHERE ID = :id`,
+      { id },
+    );
+    const row = result.rows[0];
+    return row ? this.mapTrava(row) : null;
+  }
+
+  async disable(id: number): Promise<Trava> {
+    const result = await this.db.executeQuery(
+      `UPDATE AEGIS_TRAVAS
+       SET ATIVO = 0, DATA_DESATIVACAO = SYSTIMESTAMP
+       WHERE ID = :id AND ATIVO = 1`,
+      { id },
+    );
+
+    if (!result.rowsAffected) {
+      const existing = await this.getById(id);
+      if (!existing) {
+        throw new NotFoundException({ type: 'NOT_FOUND', message: 'Trava não encontrada' });
+      }
+      return existing;
+    }
+
+    const lock = await this.getById(id);
+    if (!lock) {
+      throw new NotFoundException({ type: 'NOT_FOUND', message: 'Trava não encontrada' });
+    }
+    return lock;
+  }
+
+  private mapTrava(row: any): Trava {
     return {
-      id,
-      nome: r.NOME,
-      descricao: r.DESCRICAO ?? undefined,
-      endpoint: r.ENDPOINT,
-      metodo: r.METODO,
-      ativo: Boolean(r.ATIVO),
+      id: String(row.ID),
+      nome: row.NOME,
+      descricao: row.DESCRICAO ?? undefined,
+      endpoint: row.ENDPOINT,
+      metodo: row.METODO,
+      ativo: Number(row.ATIVO) === 1,
+      dataCriacao: this.formatDate(row.DATA_CRIACAO),
+      dataDesativacao: row.DATA_DESATIVACAO ? this.formatDate(row.DATA_DESATIVACAO) : undefined,
     };
+  }
+
+  private formatDate(value: unknown): string {
+    return value instanceof Date ? value.toISOString() : String(value ?? '');
   }
 }

@@ -26,7 +26,7 @@ export const dashboardHandlers = [
     });
   }),
 
-  http.get('/api/v1/health', () => {
+  http.get('/api/v1/dashboard/health', () => {
     return HttpResponse.json({
       status: 'healthy',
       uptime: 86400,

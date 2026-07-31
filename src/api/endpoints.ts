@@ -5,6 +5,7 @@ export const API_ENDPOINTS = {
   DASHBOARD: {
     SUMMARY: '/dashboard/summary',
     RECENT_ACTIVITY: '/dashboard/recent-activity',
+    HEALTH: '/dashboard/health',
   },
   FICHAS: {
     LIST: '/fichas',
@@ -38,5 +39,4 @@ export const API_ENDPOINTS = {
     LOGS: '/monitoring/logs',
     DETAILS: (id: string) => `/monitoring/logs/${id}`,
   },
-  HEALTH: '/health',
 } as const;

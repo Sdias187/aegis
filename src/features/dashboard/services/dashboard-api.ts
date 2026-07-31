@@ -14,7 +14,7 @@ export const dashboardApi = {
   },
 
   getHealth: async (): Promise<SystemHealth> => {
-    const response = await httpClient.get(API_ENDPOINTS.HEALTH);
+    const response = await httpClient.get(API_ENDPOINTS.DASHBOARD.HEALTH);
     return response.data;
   },
 };
