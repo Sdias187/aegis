@@ -39,7 +39,7 @@ const navGroups: NavGroup[] = [
       { label: 'Dashboard', href: '/', icon: LayoutDashboard },
       { label: 'Fichas', href: '/records', icon: FileText },
       { label: 'Travas', href: '/locks', icon: Lock },
-      { label: 'Importação', href: '/import', icon: Upload },
+      { label: 'Importação', href: '/import/massivo', icon: Upload },
       { label: 'Logs de Execução', href: '/logs/execution', icon: ScrollText },
       { label: 'Monitoramento', href: '/monitoring', icon: Activity },
     ],
@@ -122,7 +122,7 @@ export function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 overflow-y-auto p-3">
+      <nav className="flex-1 space-y-1 overflow-y-auto p-2">
         {navGroups.map((group) => (
           <div key={group.label}>
             {/* Group Header */}
@@ -133,7 +133,12 @@ export function Sidebar() {
             ) : (
               <button
                 onClick={() => toggleGroup(group.label)}
-                className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-surface-elevated hover:text-foreground transition-colors"
+                className={cn(
+                  'flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all',
+                  expandedGroups.has(group.label)
+                    ? 'text-foreground'
+                    : 'text-muted-foreground hover:bg-surface-elevated hover:text-foreground',
+                )}
               >
                 <group.icon className="size-5 shrink-0" />
                 <span className="flex-1 text-left">{group.label}</span>
@@ -149,7 +154,7 @@ export function Sidebar() {
 
             {/* Group Items */}
             {expandedGroups.has(group.label) && !isCollapsed && (
-              <div className="ml-2 mt-1 space-y-1 border-l border-border pl-2">
+              <div className="ml-2 mt-1 space-y-0.5 border-l border-border pl-2">
                 {group.items.map((item) => (
                   <NavLink
                     key={item.href}
@@ -157,9 +162,9 @@ export function Sidebar() {
                     end={item.href === '/'}
                     className={({ isActive }) =>
                       cn(
-                        'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                        'relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all',
                         isActive
-                          ? 'bg-primary/10 text-primary-light'
+                          ? 'bg-primary/10 text-primary-light before:absolute before:-left-2 before:top-1/2 before:h-4 before:w-0.5 before:-translate-y-1/2 before:rounded-full before:bg-primary-light'
                           : 'text-muted-foreground hover:bg-surface-elevated hover:text-foreground',
                       )
                     }

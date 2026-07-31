@@ -4,15 +4,15 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/utils';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       variant: {
-        default: 'bg-primary text-primary-foreground hover:bg-primary-hover shadow-sm',
-        secondary: 'bg-surface text-foreground hover:bg-surface-elevated border border-border',
-        ghost: 'text-foreground hover:bg-surface-elevated',
-        danger: 'bg-danger text-danger-foreground hover:opacity-90 shadow-sm',
-        outline: 'border border-border bg-transparent hover:bg-surface-elevated text-foreground',
+        default: 'bg-primary text-primary-foreground hover:bg-primary-hover shadow-sm active:scale-[0.97]',
+        secondary: 'bg-surface text-foreground hover:bg-surface-elevated hover:border-primary/30 border border-border active:scale-[0.97]',
+        ghost: 'text-foreground hover:bg-surface-elevated active:scale-[0.97]',
+        danger: 'bg-danger text-danger-foreground hover:opacity-90 shadow-sm active:scale-[0.97]',
+        outline: 'border border-border bg-transparent hover:bg-surface-elevated hover:border-primary/30 text-foreground active:scale-[0.97]',
         link: 'text-primary-light underline-offset-4 hover:underline',
       },
       size: {

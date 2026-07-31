@@ -16,6 +16,9 @@
     --primary-foreground: #ffffff;
     --secondary: #8b63d4;
     --secondary-foreground: #ffffff;
+    --surface: #161b22;
+    --surface-hover: #1c2128;
+    --surface-elevated: #1c2128;
     --muted: #6e7681;
     --muted-foreground: #8b949e;
     --accent: #a78bfa;
@@ -41,6 +44,27 @@
   body {
     @apply bg-background text-foreground font-sans;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  /* Transicao base suave para elementos interativos */
+  a, button, [role="button"] {
+    @apply transition-all duration-150;
+  }
+
+  /* Scrollbar customizada */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #30363d;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #484f58;
   }
 }
 

@@ -19,7 +19,7 @@ interface StatCardProps {
 
 function StatCard({ title, value, icon, variant = 'default' }: StatCardProps) {
   return (
-    <Card className={cn('p-5 transition-all duration-200 hover:shadow-glow hover:border-primary/20')}>
+    <Card className={cn('p-5 transition-all duration-200 hover:shadow-glow hover:-translate-y-0.5 hover:border-primary/20')}>
       <div className="flex items-start justify-between">
         <div className="space-y-2">
           <p className="text-sm font-medium text-muted-foreground">{title}</p>

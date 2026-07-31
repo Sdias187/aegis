@@ -5,6 +5,8 @@ import { FichasModule } from './fichas/fichas.module';
 import { TravasModule } from './travas/travas.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { ImportMassivoModule } from './import-massivo/import-massivo.module';
+import { ExecutionLogsModule } from './execution-logs/execution-logs.module';
+import { MonitoringModule } from './monitoring/monitoring.module';
 import { AppController } from './app.controller';
 import configuration from './config/configuration';
 
@@ -20,6 +22,8 @@ import configuration from './config/configuration';
     TravasModule,
     DashboardModule,
     ImportMassivoModule,
+    ExecutionLogsModule,
+    MonitoringModule,
   ],
   controllers: [AppController],
 })

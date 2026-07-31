@@ -129,7 +129,7 @@ export function DataTable<T extends { id: string }>({
                     <th
                       key={header.id}
                       className={cn(
-                        'h-11 px-4 text-left align-middle font-medium text-muted-foreground',
+                        'h-11 px-4 text-left align-middle text-xs font-semibold uppercase tracking-wider text-muted-foreground',
                         'border-b border-border',
                         header.column.getCanSort() && 'cursor-pointer select-none hover:text-foreground',
                       )}

@@ -20,7 +20,7 @@ export function MainLayout() {
       >
         <Topbar />
         <main className="flex-1 overflow-auto">
-          <div className="container mx-auto p-6">
+          <div className="container mx-auto animate-fadeIn p-6">
             <Suspense fallback={<LoadingState message="Carregando..." />}>
               <Outlet />
             </Suspense>
