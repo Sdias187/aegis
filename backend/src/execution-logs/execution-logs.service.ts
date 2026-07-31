@@ -101,7 +101,7 @@ export class ExecutionLogsService {
     const orderBy = resolveOrderBy(params.sortBy, params.sortOrder);
 
     const sql = `
-      SELECT ROWIDTOCHAR(ROWID) AS ROW_ID, ENDPOINT, VALIDATION_NAME, RESULT, STATUS, EXECUTION_TIME_MS, CREATED_AT, INPUT_VALUE
+      SELECT ID, CORRELATION_ID, ENDPOINT, VALIDATION_NAME, RESULT, STATUS, EXECUTION_TIME_MS, CREATED_AT, INPUT_VALUE
       FROM AEGIS_LOGS
       ${where}
       ${orderBy}
@@ -119,7 +119,8 @@ export class ExecutionLogsService {
 
     return {
       data: dataResult.rows.map((row) => ({
-        id: row.ROW_ID,
+        id: String(row.ID),
+        correlationId: row.CORRELATION_ID ?? undefined,
         endpoint: row.ENDPOINT,
         validationName: row.VALIDATION_NAME ?? undefined,
         result: row.RESULT ?? undefined,

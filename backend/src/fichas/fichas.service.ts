@@ -40,7 +40,7 @@ export class FichasService {
     const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
     const countBinds = Object.fromEntries(Object.entries(binds).filter(([key]) => key !== 'offset' && key !== 'limit'));
     const [dataResult, countResult] = await Promise.all([
-      this.db.executeQuery<any>(`SELECT ROWIDTOCHAR(ROWID) AS ROW_ID, ATENDIMENTO_PARA, SERVICO, OFERTA_SERVICO, DETALHE_FALHA, CATEGORIA, SUBCATEGORIA FROM AEGIS_FICHAS ${where} ${orderBy(params.sortBy, params.sortOrder)} OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY`, binds),
+      this.db.executeQuery<any>(`SELECT ID, ATENDIMENTO_PARA, SERVICO, OFERTA_SERVICO, DETALHE_FALHA, CATEGORIA, SUBCATEGORIA FROM AEGIS_FICHAS ${where} ${orderBy(params.sortBy, params.sortOrder)} OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY`, binds),
       this.db.executeQuery<{ TOTAL: number }>(`SELECT COUNT(*) AS TOTAL FROM AEGIS_FICHAS ${where}`, countBinds),
     ]);
     const total = Number(countResult.rows[0]?.TOTAL ?? 0);
@@ -48,7 +48,7 @@ export class FichasService {
   }
 
   async getById(id: string): Promise<Ficha | null> {
-    const result = await this.db.executeQuery<any>(`SELECT ROWIDTOCHAR(ROWID) AS ROW_ID, ATENDIMENTO_PARA, SERVICO, OFERTA_SERVICO, DETALHE_FALHA, CATEGORIA, SUBCATEGORIA FROM AEGIS_FICHAS WHERE ROWID = CHARTOROWID(:id)`, { id });
+    const result = await this.db.executeQuery<any>(`SELECT ID, ATENDIMENTO_PARA, SERVICO, OFERTA_SERVICO, DETALHE_FALHA, CATEGORIA, SUBCATEGORIA FROM AEGIS_FICHAS WHERE ID = :id`, { id });
     return result.rows[0] ? this.mapFicha(result.rows[0]) : null;
   }
 
@@ -61,12 +61,12 @@ export class FichasService {
     const existing = await this.getById(id);
     if (!existing) throw new NotFoundException({ type: 'NOT_FOUND', message: 'Ficha não encontrada' });
     const merged: CreateFichaDto = { ...existing, ...data };
-    await this.db.executeQuery(`UPDATE AEGIS_FICHAS SET ATENDIMENTO_PARA = :atendimentoPara, SERVICO = :servico, OFERTA_SERVICO = :ofertaServico, DETALHE_FALHA = :detalheFalha, CATEGORIA = :categoria, SUBCATEGORIA = :subcategoria WHERE ROWID = CHARTOROWID(:id)`, { id, ...this.toBinds(merged) });
+    await this.db.executeQuery(`UPDATE AEGIS_FICHAS SET ATENDIMENTO_PARA = :atendimentoPara, SERVICO = :servico, OFERTA_SERVICO = :ofertaServico, DETALHE_FALHA = :detalheFalha, CATEGORIA = :categoria, SUBCATEGORIA = :subcategoria WHERE ID = :id`, { id, ...this.toBinds(merged) });
     return { id, atendimentoPara: merged.atendimentoPara, servico: merged.servico, ofertaServico: merged.ofertaServico, detalheFalha: merged.detalheFalha, categoria: merged.categoria, subcategoria: merged.subcategoria };
   }
 
   async remove(id: string): Promise<void> {
-    const result = await this.db.executeQuery('DELETE FROM AEGIS_FICHAS WHERE ROWID = CHARTOROWID(:id)', { id });
+    const result = await this.db.executeQuery('DELETE FROM AEGIS_FICHAS WHERE ID = :id', { id });
     if (!result.rowsAffected) throw new NotFoundException({ type: 'NOT_FOUND', message: 'Ficha não encontrada' });
   }
 

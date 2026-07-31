@@ -24,7 +24,7 @@ export class TravasService {
     const sortColumn = params.sortBy ? SORT_COLUMNS[params.sortBy] : undefined;
     const orderBy = `ORDER BY ${sortColumn ?? 'NOME'} ${params.sortOrder === 'desc' ? 'DESC' : 'ASC'}`;
     const [dataResult, countResult] = await Promise.all([
-      this.db.executeQuery<any>(`SELECT ROWIDTOCHAR(ROWID) AS ROW_ID, NOME, DESCRICAO, ENDPOINT, METODO, ATIVO FROM AEGIS_TRAVAS ${where} ${orderBy} OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY`, binds),
+      this.db.executeQuery<any>(`SELECT ID, ACAO, BODY_TEMPLATE, NOME, DESCRICAO, ENDPOINT, METODO, ATIVO FROM AEGIS_TRAVAS ${where} ${orderBy} OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY`, binds),
       this.db.executeQuery<{ TOTAL: number }>(`SELECT COUNT(*) AS TOTAL FROM AEGIS_TRAVAS ${where}`, countBinds),
     ]);
     const total = Number(countResult.rows[0]?.TOTAL ?? 0);
@@ -32,12 +32,12 @@ export class TravasService {
   }
 
   async getById(id: string): Promise<Trava | null> {
-    const result = await this.db.executeQuery<any>('SELECT ROWIDTOCHAR(ROWID) AS ROW_ID, NOME, DESCRICAO, ENDPOINT, METODO, ATIVO FROM AEGIS_TRAVAS WHERE ROWID = CHARTOROWID(:id)', { id });
+    const result = await this.db.executeQuery<any>('SELECT ID, ACAO, BODY_TEMPLATE, NOME, DESCRICAO, ENDPOINT, METODO, ATIVO FROM AEGIS_TRAVAS WHERE ID = :id', { id });
     return result.rows[0] ? this.mapTrava(result.rows[0]) : null;
   }
 
   async disable(id: string): Promise<Trava> {
-    const result = await this.db.executeQuery('UPDATE AEGIS_TRAVAS SET ATIVO = 0 WHERE ROWID = CHARTOROWID(:id) AND ATIVO = 1', { id });
+    const result = await this.db.executeQuery('UPDATE AEGIS_TRAVAS SET ATIVO = 0 WHERE ID = :id AND ATIVO = 1', { id });
     if (!result.rowsAffected) {
       const existing = await this.getById(id);
       if (!existing) throw new NotFoundException({ type: 'NOT_FOUND', message: 'Trava não encontrada' });
@@ -49,6 +49,6 @@ export class TravasService {
   }
 
   private mapTrava(row: any): Trava {
-    return { id: row.ROW_ID, nome: row.NOME, descricao: row.DESCRICAO ?? undefined, endpoint: row.ENDPOINT, metodo: row.METODO, ativo: Number(row.ATIVO) === 1 };
+    return { id: String(row.ID), nome: row.NOME, descricao: row.DESCRICAO ?? undefined, endpoint: row.ENDPOINT, metodo: row.METODO, ativo: Number(row.ATIVO) === 1, acao: row.ACAO ?? undefined, bodyTemplate: row.BODY_TEMPLATE ?? undefined };
   }
 }

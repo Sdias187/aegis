@@ -1,5 +1,4 @@
 import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
-import { randomUUID } from 'node:crypto';
 import * as XLSX from 'xlsx';
 import { DatabaseService } from '../database/database.service';
 

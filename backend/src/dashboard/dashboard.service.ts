@@ -56,14 +56,14 @@ export class DashboardService {
 
   async getRecentActivity(): Promise<RecentActivity[]> {
     const result = await this.db.executeQuery<any>(`
-      SELECT ROWIDTOCHAR(ROWID) AS ROW_ID, ENDPOINT, RESULT, CREATED_AT
+      SELECT ID, ENDPOINT, RESULT, CREATED_AT
       FROM AEGIS_LOGS
       ORDER BY CREATED_AT DESC
       FETCH FIRST 10 ROWS ONLY
     `);
 
     return result.rows.map((row) => ({
-      id: row.ROW_ID,
+      id: String(row.ID),
       type: this.getActivityType(row.ENDPOINT),
       description: row.RESULT ?? row.ENDPOINT,
       timestamp: row.CREATED_AT?.toISOString?.() ?? String(row.CREATED_AT ?? ''),

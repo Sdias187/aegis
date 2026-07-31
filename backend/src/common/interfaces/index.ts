@@ -9,16 +9,19 @@ export interface Ficha {
 }
 
 export interface Trava {
-  id?: string;
+  id: string;
   nome: string;
   descricao?: string;
   endpoint: string;
   metodo: string;
   ativo: boolean;
+  acao?: string;
+  bodyTemplate?: string;
 }
 
 export interface ExecLog {
-  id?: string;
+  id: string;
+  correlationId?: string;
   endpoint: string;
   validationName: string;
   result?: string;
@@ -29,7 +32,8 @@ export interface ExecLog {
 }
 
 export interface MonitoringLog {
-  id?: string;
+  id: string;
+  correlationId?: string;
   sourceSystem: string;
   requestBody?: string;
   durationMs: number;
