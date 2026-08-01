@@ -21,6 +21,7 @@ export class PaginationPipe implements PipeTransform {
       descricao: query.descricao,
       endpoint: query.endpoint,
       metodo: query.metodo,
+      active: query.active,
       sortBy: query.sortBy,
       sortOrder: (query.sortOrder as 'asc' | 'desc') || 'asc',
     };
