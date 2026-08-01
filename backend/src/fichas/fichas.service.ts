@@ -139,7 +139,7 @@ export class FichasService {
 
   private mapFicha(row: any): Ficha {
     return {
-      id: row.ROW_ID,
+      id: String(row.ID ?? row.ROW_ID),
       atendimentoPara: row.ATENDIMENTO_PARA,
       servico: row.SERVICO,
       ofertaServico: row.OFERTA_SERVICO ?? undefined,
