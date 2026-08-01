@@ -23,6 +23,8 @@ export class DatabaseService implements OnModuleInit, OnApplicationShutdown {
 
     oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
     oracledb.autoCommit = true;
+    // CLOB/NCLOB como string para evitar objetos Lob circulares no JSON
+    oracledb.fetchAsString = [oracledb.CLOB, oracledb.NCLOB];
 
     const dbConfig = this.configService.get<{
       user: string;
@@ -67,16 +69,28 @@ export class DatabaseService implements OnModuleInit, OnApplicationShutdown {
       return { rows: [] as T[] };
     }
 
-    const conn = await this.getConnection();
+    let conn: oracledb.Connection | null = null;
     try {
+      conn = await this.getConnection();
       const result = await conn.execute<T>(sql, binds as oracledb.BindParameters);
       return {
         rows: (result.rows ?? []) as T[],
         rowsAffected: result.rowsAffected,
         outBinds: result.outBinds as Record<string, unknown> | undefined,
       };
+    } catch (err) {
+      // Normaliza erros do oracledb para evitar estrutura circular
+      // (ConnectDescription -> cOpts -> ConnOption) que quebra o JSON
+      const e = err as { message?: string };
+      throw new Error(e?.message ?? String(err));
     } finally {
-      await conn.close();
+      if (conn) {
+        try {
+          await conn.close();
+        } catch {
+          // ignora erro no fechamento da conexao
+        }
+      }
     }
   }
 }
