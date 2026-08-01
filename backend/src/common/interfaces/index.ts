@@ -96,14 +96,3 @@ export interface SystemHealth {
   uptime: number;
   lastCheck: string;
 }
-
-export interface CreateFichaDto {
-  atendimentoPara: string;
-  servico: string;
-  ofertaServico?: string;
-  detalheFalha?: string;
-  categoria?: string;
-  subcategoria?: string;
-}
-
-export type UpdateFichaDto = Partial<CreateFichaDto>;

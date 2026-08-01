@@ -13,7 +13,9 @@ import {
 } from '@nestjs/common';
 import { FichasService } from './fichas.service';
 import { PaginationPipe } from '../common/pipes/pagination.pipe';
-import type { CreateFichaDto, PaginationParams, UpdateFichaDto } from '../common/interfaces';
+import { CreateFichaDto } from '../common/dto/create-ficha.dto';
+import { UpdateFichaDto } from '../common/dto/update-ficha.dto';
+import type { PaginationParams } from '../common/interfaces';
 
 @Controller('fichas')
 export class FichasController {

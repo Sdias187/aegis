@@ -65,7 +65,6 @@ services:
       - APP_USER_PASSWORD=${ORACLE_PASSWORD:-aegis123}
     volumes:
       - oracle-data:/opt/oracle/oradata
-      - ./backend/init-scripts:/container-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD", "healthcheck.sh"]
       interval: 30s

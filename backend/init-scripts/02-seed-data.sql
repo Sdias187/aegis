@@ -20,34 +20,34 @@ VALUES ('Pedro Souza', 'Segurança', 'Premium', 'Tentativa de acesso não autori
 
 -- Travas
 INSERT INTO AEGIS_TRAVAS (NOME, DESCRICAO, ENDPOINT, METODO, ATIVO)
-VALUES ('Login Legado', 'Trava de segurança para login do sistema legado', '/api/v2/login', 'POST', 1);
+VALUES ('Login Legado', 'Trava de segurança para login do sistema legado', '/api/v2/login', 'POST', 'TRUE');
 
 INSERT INTO AEGIS_TRAVAS (NOME, DESCRICAO, ENDPOINT, METODO, ATIVO)
-VALUES ('Pagamentos', 'Bloqueio preventivo de processamento de pagamentos', '/checkout', 'POST', 1);
+VALUES ('Pagamentos', 'Bloqueio preventivo de processamento de pagamentos', '/checkout', 'POST', 'TRUE');
 
 INSERT INTO AEGIS_TRAVAS (NOME, DESCRICAO, ENDPOINT, METODO, ATIVO)
-VALUES ('Notificações Push', 'Gateway de notificações em manutenção', '/push', 'POST', 1);
+VALUES ('Notificações Push', 'Gateway de notificações em manutenção', '/push', 'POST', 'TRUE');
 
 INSERT INTO AEGIS_TRAVAS (NOME, DESCRICAO, ENDPOINT, METODO, ATIVO)
-VALUES ('Ingestão de Logs', 'Serviço de logs centralizado sobrecarregado', '/ingest', 'POST', 1);
+VALUES ('Ingestão de Logs', 'Serviço de logs centralizado sobrecarregado', '/ingest', 'POST', 'TRUE');
 
 INSERT INTO AEGIS_TRAVAS (NOME, DESCRICAO, ENDPOINT, METODO, ATIVO)
-VALUES ('Health Check', 'Balanceador de carga em manutenção programada', '/health', 'GET', 1);
+VALUES ('Health Check', 'Balanceador de carga em manutenção programada', '/health', 'GET', 'TRUE');
 
 INSERT INTO AEGIS_TRAVAS (NOME, DESCRICAO, ENDPOINT, METODO, ATIVO)
-VALUES ('Proxy Reverso', 'Atualização de configuração do proxy', '/api', 'GET', 1);
+VALUES ('Proxy Reverso', 'Atualização de configuração do proxy', '/api', 'GET', 'TRUE');
 
 INSERT INTO AEGIS_TRAVAS (NOME, DESCRICAO, ENDPOINT, METODO, ATIVO)
-VALUES ('Cache Distribuído', 'Limpeza de cache programada', '/keys', 'DELETE', 1);
+VALUES ('Cache Distribuído', 'Limpeza de cache programada', '/keys', 'DELETE', 'TRUE');
 
 INSERT INTO AEGIS_TRAVAS (NOME, DESCRICAO, ENDPOINT, METODO, ATIVO)
-VALUES ('Consulta Direta BD', 'Restrição de consultas diretas ao banco', '/query', 'SELECT', 1);
+VALUES ('Consulta Direta BD', 'Restrição de consultas diretas ao banco', '/query', 'SELECT', 'TRUE');
 
 INSERT INTO AEGIS_TRAVAS (NOME, DESCRICAO, ENDPOINT, METODO, ATIVO)
-VALUES ('Exportação Relatórios', 'Módulo de relatórios em atualização', '/export', 'GET', 0);
+VALUES ('Exportação Relatórios', 'Módulo de relatórios em atualização', '/export', 'GET', 'FALSE');
 
 INSERT INTO AEGIS_TRAVAS (NOME, DESCRICAO, ENDPOINT, METODO, ATIVO)
-VALUES ('Upload Arquivos', 'API de importação temporariamente desativada', '/upload', 'POST', 0);
+VALUES ('Upload Arquivos', 'API de importação temporariamente desativada', '/upload', 'POST', 'FALSE');
 
 -- Logs de execução
 INSERT INTO AEGIS_LOGS (ENDPOINT, VALIDATION_NAME, RESULT, STATUS, EXECUTION_TIME_MS, INPUT_VALUE)

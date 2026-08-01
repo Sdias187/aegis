@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
-import { Logger } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import helmet from 'helmet';
@@ -12,6 +12,13 @@ async function bootstrap() {
   app.enableCors();
   app.setGlobalPrefix('api/v1', { exclude: ['/health'] });
   app.useGlobalFilters(new AllExceptionsFilter());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
   app.enableShutdownHooks();
 
   const port = Number(process.env.PORT) || 8090;
