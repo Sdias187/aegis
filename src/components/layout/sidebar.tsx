@@ -16,6 +16,7 @@ import {
   Radio,
   Database,
   X,
+  Ban,
 } from 'lucide-react';
 import { cn } from '@/utils';
 import { useSidebarStore } from '@/store';
@@ -41,6 +42,7 @@ const navGroups: NavGroup[] = [
       { label: 'Fichas', href: '/records', icon: FileText },
       { label: 'Travas', href: '/locks', icon: Lock },
       { label: 'Importação', href: '/import/massivo', icon: Upload },
+      { label: 'Badlist', href: '/badlist', icon: Ban },
       { label: 'Logs de Execução', href: '/logs/execution', icon: ScrollText },
       { label: 'Monitoramento', href: '/monitoring', icon: Activity },
     ],

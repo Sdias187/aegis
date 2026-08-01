@@ -10,6 +10,7 @@ export const ROUTES = {
   },
   IMPORT: '/import',
   IMPORT_MASSIVO: '/import/massivo',
+  BADLIST: '/badlist',
   LOGS: {
     EXECUTION: '/logs/execution',
   },

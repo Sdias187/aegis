@@ -58,8 +58,22 @@ export interface PaginationParams {
   descricao?: string;
   endpoint?: string;
   metodo?: string;
+  // Badlist
+  active?: string;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+}
+
+export interface Badlist {
+  id: string;
+  fichaId: string;
+  servico?: string;
+  atendimentoPara?: string;
+  ofertaServico?: string;
+  detalheFalha?: string;
+  words: string;
+  active: number;
+  createdAt?: string;
 }
 
 export interface PaginatedResponse<T> {

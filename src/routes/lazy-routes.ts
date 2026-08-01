@@ -12,3 +12,4 @@ export const LazyGps = lazy(() => import('@/features/consulta-logs/components/gp
 export const LazyVivo360 = lazy(() => import('@/features/consulta-logs/components/vivo-360-page'));
 export const LazySiebel = lazy(() => import('@/features/servicos/components/siebel-page'));
 export const LazyImportMassivo = lazy(() => import('@/features/import-massivo/components/import-massivo-page'));
+export const LazyBadlist = lazy(() => import('@/features/badlist/components/badlist-page'));

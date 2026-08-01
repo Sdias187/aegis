@@ -14,6 +14,7 @@ import {
   LazyVivo360,
   LazySiebel,
   LazyImportMassivo,
+  LazyBadlist,
 } from './lazy-routes';
 
 const routes: RouteObject[] = [
@@ -32,6 +33,7 @@ const routes: RouteObject[] = [
       { path: ROUTES.CONSULTA_LOGS.VIVO_360, element: <LazyVivo360 /> },
       { path: ROUTES.SERVICOS.SIEBEL, element: <LazySiebel /> },
       { path: ROUTES.IMPORT_MASSIVO, element: <LazyImportMassivo /> },
+      { path: ROUTES.BADLIST, element: <LazyBadlist /> },
     ],
   },
 ];

@@ -40,4 +40,11 @@ export const API_ENDPOINTS = {
     LOGS: '/monitoring/logs',
     DETAILS: (id: string) => `/monitoring/logs/${id}`,
   },
+  BADLIST: {
+    LIST: '/badlist',
+    DETAILS: (id: string) => `/badlist/${id}`,
+    CREATE: '/badlist',
+    UPDATE: (id: string) => `/badlist/${id}`,
+    DELETE: (id: string) => `/badlist/${id}`,
+  },
 } as const;
