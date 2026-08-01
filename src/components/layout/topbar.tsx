@@ -23,10 +23,10 @@ export function Topbar() {
   }, [handleGlobalSearch]);
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border bg-background/70 px-4 backdrop-blur-xl shadow-sm">
+    <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b border-border bg-background/70 px-4 backdrop-blur-xl sm:h-16">
       <button
         onClick={toggle}
-        className="rounded-md p-1.5 text-muted-foreground hover:bg-surface-elevated hover:text-foreground transition-all"
+        className="rounded-lg p-2 text-muted-foreground hover:bg-surface-elevated hover:text-foreground transition-all"
         aria-label="Abrir menu"
       >
         <Menu className="size-5" />
@@ -38,7 +38,7 @@ export function Topbar() {
 
       <button
         onClick={handleGlobalSearch}
-        className="flex items-center gap-2 rounded-md border border-border bg-surface px-3 py-1.5 text-sm text-muted-foreground hover:border-primary/30 hover:text-foreground transition-all"
+        className="flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-1.5 text-sm text-muted-foreground hover:border-primary/30 hover:text-foreground transition-all"
         aria-label="Buscar (Ctrl+K)"
       >
         <Search className="size-4" />
