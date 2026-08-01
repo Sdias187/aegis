@@ -19,10 +19,16 @@ export function useBadlistDetail(id: string | null) {
   });
 }
 
-export function useFichasForSelect() {
+export function useFichasForSelect(params: {
+  page: number;
+  limit: number;
+  search?: string;
+  atendimentoPara?: string;
+}) {
   return useQuery({
-    queryKey: ['fichas-select'],
-    queryFn: () => badlistApi.listFichas(),
-    staleTime: 60 * 1000,
+    queryKey: ['fichas-select', params],
+    queryFn: () => badlistApi.listFichas(params),
+    placeholderData: keepPreviousData,
+    staleTime: 30 * 1000,
   });
 }

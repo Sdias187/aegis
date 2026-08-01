@@ -34,9 +34,14 @@ export const badlistApi = {
     await httpClient.delete(API_ENDPOINTS.BADLIST.DELETE(id));
   },
 
-  listFichas: async (): Promise<PaginatedResponse<Ficha>> => {
+  listFichas: async (params: {
+    page: number;
+    limit: number;
+    search?: string;
+    atendimentoPara?: string;
+  }): Promise<PaginatedResponse<Ficha>> => {
     const response = await httpClient.get(API_ENDPOINTS.FICHAS.LIST, {
-      params: { page: 1, limit: 1000, sortBy: 'servico', sortOrder: 'asc' },
+      params: { sortBy: 'servico', sortOrder: 'asc', ...params },
     });
     return response.data;
   },
