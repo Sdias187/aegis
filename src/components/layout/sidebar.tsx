@@ -56,9 +56,7 @@ const navGroups: NavGroup[] = [
   {
     label: 'Serviços',
     icon: Server,
-    items: [
-      { label: 'Siebel', href: '/servicos/siebel', icon: Database },
-    ],
+    items: [{ label: 'Siebel', href: '/servicos/siebel', icon: Database }],
   },
 ];
 
@@ -111,6 +109,7 @@ export function Sidebar() {
     if (isMobile && isOpen) {
       collapse();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname, isMobile]);
 
   // Auto-collapse on small screens on mount
@@ -118,6 +117,7 @@ export function Sidebar() {
     if (isMobile && !isCollapsed) {
       collapse();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMobile]);
 
   const handleNavClick = () => {
