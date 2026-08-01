@@ -4,6 +4,8 @@ Este documento descreve os passos para execucao do AEGIS em ambiente de pre-prod
 
 > **Nota:** Este e um manual provisorio para uso durante a fase de testes. A versao final sera atualizada conforme a implantacao avancar.
 
+> **📚 Documentacao completa:** O guia de deploy atualizado (com todas as variantes, modo MOCK_DB, solucao de problemas e referencia de portas) vive em [`docs/guides/deploy.md`](docs/guides/deploy.md). A documentacao completa do projeto esta em [`docs/`](docs/README.md). Este manual permanece como referencia rapida operacional.
+
 ---
 
 ## Indice
@@ -25,12 +27,12 @@ Este documento descreve os passos para execucao do AEGIS em ambiente de pre-prod
 
 O AEGIS e composto por tres camadas:
 
-| Camada     | Tecnologia          | Porta     |
-| ---------- | ------------------- | --------- |
-| Frontend   | React 19 + Vite     | 5173      |
-| Backend    | NestJS 10           | 8090      |
-| Proxy      | Nginx (producao)    | 80        |
-| Banco      | Oracle DB           | 1521      |
+| Camada   | Tecnologia       | Porta |
+| -------- | ---------------- | ----- |
+| Frontend | React 19 + Vite  | 5173  |
+| Backend  | NestJS 10        | 8090  |
+| Proxy    | Nginx (producao) | 80    |
+| Banco    | Oracle DB        | 1521  |
 
 ### Fluxo de requisicao
 
@@ -109,11 +111,14 @@ docker compose logs -f
 ```
 
 Isso inicia tres servicos:
-- `oracle-db` — Oracle XE 21c (cria as tabelas via `init-scripts/`)
+
+- `oracle-db` — Oracle XE 21c
 - `aegis-api` — Backend NestJS na porta 8090
 - `aegis-app` — Nginx servindo o frontend na porta 80
 
-> Na primeira execucao, o Oracle leva ~2 minutos para inicializar e rodar os scripts DDL.
+> Na primeira execucao, o Oracle leva ~2 minutos para inicializar (`start_period: 120s`).
+>
+> **Atencao:** os scripts de `backend/init-scripts/` **nao sao executados automaticamente** pelo docker-compose. Se o banco for novo, execute `01-create-tables.sql` manualmente antes de subir a aplicacao (ver [`docs/explanation/modelo-de-dados.md`](docs/explanation/modelo-de-dados.md)).
 
 ### 4.2 Apenas Backend + Frontend (Oracle remoto)
 
@@ -173,13 +178,13 @@ npm start
 # 1. Instalar dependencias
 pnpm install
 
-# 2. Build de producao
-npm run build
+# 2. Build de producao (usar pnpm — gerenciador do frontend)
+pnpm run build
 
 # 3. Servir com Nginx (recomendado)
 # Usar config em .docker/nginx.conf
 # Ou via preview do Vite:
-npm run preview
+pnpm run preview
 # Servidor em http://localhost:4173
 ```
 
@@ -216,6 +221,7 @@ MOCK_DB=true npm run start:dev
 ```
 
 Neste modo:
+
 - O backend **ignora a conexao Oracle** e inicializa normalmente
 - Todas as queries retornam arrays vazios
 - Os endpoints funcionam mas retornam `{ data: [], pagination: { total: 0 } }`
@@ -255,23 +261,24 @@ MOCK_DB=true
 
 - `ATENDIMENTO_PARA`: apenas `b2c`, `b2b` ou `interno` (case insensitive)
 - `SERVICO`: obrigatorio
-- `CATEGORIA` e `SUBCATEGORIA`: opcionais (valor padrao: `N/A`)
+- `CATEGORIA` e `SUBCATEGORIA`: opcionais (deixe vazio se nao houver — vazio e salvo como NULL)
 - Formatos aceitos: `.csv` e `.xlsx`
 
 ### Normalizacao aplicada
 
-| Campo             | Regra                    | Exemplo                    |
-| ----------------- | ------------------------ | -------------------------- |
-| ATENDIMENTO_PARA  | lowercase                | `b2c`, `b2b`, `interno`   |
-| SERVICO           | UPPERCASE                | `SUPORTE TECNICO`          |
-| OFERTA_SERVICO    | UPPERCASE                | `PREMIUM`                  |
-| DETALHE_FALHA     | UPPERCASE                | `FALHA NA AUTENTICACAO`    |
-| CATEGORIA         | UPPERCASE (opcional)     | `SEGURANCA`                |
-| SUBCATEGORIA      | UPPERCASE (opcional)     | `AUTENTICACAO`             |
+| Campo            | Regra                | Exemplo                 |
+| ---------------- | -------------------- | ----------------------- |
+| ATENDIMENTO_PARA | lowercase            | `b2c`, `b2b`, `interno` |
+| SERVICO          | UPPERCASE            | `SUPORTE TECNICO`       |
+| OFERTA_SERVICO   | UPPERCASE            | `PREMIUM`               |
+| DETALHE_FALHA    | UPPERCASE            | `FALHA NA AUTENTICACAO` |
+| CATEGORIA        | UPPERCASE (opcional) | `SEGURANCA`             |
+| SUBCATEGORIA     | UPPERCASE (opcional) | `AUTENTICACAO`          |
 
 ### Retry em caso de erro
 
 Se a importacao falhar no meio (por exemplo, perda de conexao):
+
 - O sistema exibe quantos registros foram importados com sucesso
 - O boto **Tentar Novamente** retoma a partir do ultimo lote processado
 - Nao e necessario reenviar o arquivo
@@ -280,13 +287,13 @@ Se a importacao falhar no meio (por exemplo, perda de conexao):
 
 ## 8. Referencia de Portas
 
-| Ambiente | Servico   | Porta     | Observacao                |
-| -------- | --------- | --------- | ------------------------- |
-| Dev      | Frontend  | 5173      | Vite dev server           |
-| Dev      | Backend   | 8090      | NestJS                    |
-| Prod     | Nginx     | 80        | Frontend buildado         |
-| Prod     | Backend   | 8090      | Interna (so o Nginx acessa)|
-| Todos    | Oracle    | 1521      | Conforme configurado      |
+| Ambiente | Servico  | Porta | Observacao                  |
+| -------- | -------- | ----- | --------------------------- |
+| Dev      | Frontend | 5173  | Vite dev server             |
+| Dev      | Backend  | 8090  | NestJS                      |
+| Prod     | Nginx    | 80    | Frontend buildado           |
+| Prod     | Backend  | 8090  | Interna (so o Nginx acessa) |
+| Todos    | Oracle   | 1521  | Conforme configurado        |
 
 ---
 
@@ -322,6 +329,7 @@ Com Docker, todos os endpoints ficam disponiveis em `http://localhost/api/v1/...
 
 **Causa:** O backend nao consegue conectar no Oracle.
 **Solucao:**
+
 - Verificar se `ORACLE_CONNECTION_STRING` esta correta
 - Verificar se o Oracle esta acessivel (ping, firewall)
 - Usar `MOCK_DB=true` para testes sem banco
@@ -335,6 +343,7 @@ AggregateError [ECONNREFUSED]
 
 **Causa:** O frontend tenta fazer proxy para o backend mas ele nao esta rodando.
 **Solucao:**
+
 - Iniciar o backend: `cd backend && npm run start:dev`
 - Verificar se a porta esta correta (8090)
 
@@ -351,6 +360,7 @@ Dados aparecem mesmo com backend rodando
 
 **Causa:** Arquivo CSV mal formatado ou com extensao incorreta.
 **Solucao:**
+
 - Usar o template baixado pelo sistema
 - Verificar se o arquivo nao foi salvo como HTML
 - Confirmar que a extensao e `.csv` ou `.xlsx`
